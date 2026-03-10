@@ -569,6 +569,31 @@ document.addEventListener("DOMContentLoaded", () => {
         `
         }
       </div>
+      <div class="share-section">
+        <span class="share-label">Share:</span>
+        <div class="share-buttons">
+          <button class="share-button share-twitter tooltip" data-activity="${name}" title="Share on X (Twitter)">
+            𝕏
+            <span class="tooltip-text">Share on X (Twitter)</span>
+          </button>
+          <button class="share-button share-facebook tooltip" data-activity="${name}" title="Share on Facebook">
+            f
+            <span class="tooltip-text">Share on Facebook</span>
+          </button>
+          <button class="share-button share-whatsapp tooltip" data-activity="${name}" title="Share on WhatsApp">
+            💬
+            <span class="tooltip-text">Share on WhatsApp</span>
+          </button>
+          <button class="share-button share-email tooltip" data-activity="${name}" title="Share via Email">
+            ✉
+            <span class="tooltip-text">Share via Email</span>
+          </button>
+          <button class="share-button share-copy tooltip" data-activity="${name}" title="Copy link">
+            🔗
+            <span class="tooltip-text">Copy link</span>
+          </button>
+        </div>
+      </div>
     `;
 
     // Add click handlers for delete buttons
@@ -587,7 +612,62 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    // Add click handlers for share buttons
+    activityCard.querySelectorAll(".share-button").forEach((button) => {
+      button.addEventListener("click", (e) => {
+        e.stopPropagation();
+        handleShareActivity(name, details, button);
+      });
+    });
+
     activitiesList.appendChild(activityCard);
+  }
+
+  function handleShareActivity(name, details, button) {
+    const shareText = `Check out ${name} at Mergington High School! ${details.description} Schedule: ${details.schedule}`;
+    const shareUrl = window.location.href;
+
+    if (button.classList.contains("share-twitter")) {
+      window.open(
+        `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    } else if (button.classList.contains("share-facebook")) {
+      window.open(
+        `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    } else if (button.classList.contains("share-whatsapp")) {
+      window.open(
+        `https://wa.me/?text=${encodeURIComponent(shareText + " " + shareUrl)}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    } else if (button.classList.contains("share-email")) {
+      window.location.href = `mailto:?subject=${encodeURIComponent("Join " + name + " at Mergington High School")}&body=${encodeURIComponent(shareText + "\n\n" + shareUrl)}`;
+    } else if (button.classList.contains("share-copy")) {
+      navigator.clipboard.writeText(shareUrl + "#" + encodeURIComponent(name)).then(() => {
+        const originalTitle = button.title;
+        button.classList.add("share-copy-success");
+        button.title = "Copied!";
+        const tooltip = button.querySelector(".tooltip-text");
+        if (tooltip) tooltip.textContent = "Copied!";
+        setTimeout(() => {
+          button.classList.remove("share-copy-success");
+          button.title = originalTitle;
+          if (tooltip) tooltip.textContent = "Copy link";
+        }, 2000);
+      }).catch(() => {
+        const tooltip = button.querySelector(".tooltip-text");
+        if (tooltip) {
+          const original = tooltip.textContent;
+          tooltip.textContent = "Copy failed";
+          setTimeout(() => { tooltip.textContent = original; }, 2000);
+        }
+      });
+    }
   }
 
   // Event listeners for search and filter
